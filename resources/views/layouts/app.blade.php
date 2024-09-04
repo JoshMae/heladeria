@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Sarita</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjZejdUT9Y3gzgtDaiJitduHFEruxciOo"></script>
     <style>
         .navbar-custom {
             background-color: #E90B0B;
@@ -184,13 +185,35 @@
                     success: function(data) {
                         $('.content-area').html(data);
                         history.pushState(null, '', url);
+        
+                        // Ejecutar scripts después de cargar el contenido
+                        var scripts = $('.content-area script');
+                        if (scripts.length > 0) {
+                            scripts.each(function() {
+                                eval($(this).text());
+                            });
+                        }
+        
+                        // Inicializar el mapa si estamos en la página de ubicación
+                        if (url.includes('ubicacion')) {
+                            if (typeof google !== 'undefined' && typeof window.initMap === 'function') {
+                                window.initMap();
+                            } else {
+                                // Si el API de Google Maps no está cargado, lo cargamos
+                                var script = document.createElement('script');
+                                script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDjZejdUT9Y3gzgtDaiJitduHFEruxciOo&callback=initMap';
+                                script.async = true;
+                                script.defer = true;
+                                document.head.appendChild(script);
+                            }
+                        }
                     },
                     error: function(xhr) {
                         console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
                     }
                 });
             }
-
+        
             // Manejar clics en los enlaces de navegación
             $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
                 e.preventDefault();
@@ -201,12 +224,15 @@
                 $('.navbar-nav .nav-link').removeClass('active');
                 $(this).addClass('active');
             });
-
+        
             // Manejar eventos de navegación del navegador
             $(window).on('popstate', function() {
                 loadContent(location.href);
             });
+        
+            // Cargar el contenido inicial
+            loadContent(window.location.href);
         });
-    </script>
+        </script>
 </body>
 </html>
