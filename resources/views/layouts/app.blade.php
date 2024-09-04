@@ -170,5 +170,43 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Usar la versión completa de jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Función para cargar contenido mediante AJAX
+            function loadContent(url) {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(data) {
+                        $('.content-area').html(data);
+                        history.pushState(null, '', url);
+                    },
+                    error: function(xhr) {
+                        console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
+                    }
+                });
+            }
+
+            // Manejar clics en los enlaces de navegación
+            $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
+                e.preventDefault();
+                var url = $(this).attr('href');
+                loadContent(url);
+                
+                // Actualizar la clase 'active'
+                $('.navbar-nav .nav-link').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Manejar eventos de navegación del navegador
+            $(window).on('popstate', function() {
+                loadContent(location.href);
+            });
+        });
+    </script>
 </body>
 </html>
