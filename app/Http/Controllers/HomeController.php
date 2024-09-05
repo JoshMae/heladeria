@@ -33,7 +33,7 @@ class HomeController extends Controller
     public function ubicacion()
     {
         if (request()->ajax()) {
-            return view('ubicacion')->render();
+            return view('partials.ubicacion')->render();
         }
         return view('ubicacion');
     }

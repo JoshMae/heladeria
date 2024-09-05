@@ -37,10 +37,12 @@
         .content-area {
             padding-top: 95px;
             padding-bottom: 90px;
-            min-height: calc(100vh - 165px); /* Ajusta esta altura según sea necesario */
-            overflow: hidden; /* Evita el desbordamiento si el contenido es más grande */
+            min-height: calc(100vh - 165px);
         }
 
+        #ajax-content {
+            overflow: auto;
+        }
 
         .navbar-nav .nav-link {
             color: white !important;
@@ -137,7 +139,9 @@
 
     <!-- Área de Contenido Dinámico -->
     <div class="container content-area">
-        @yield('content')
+        <div id="ajax-content">
+            @yield('content')
+        </div>
     </div>
 
     <!-- Barra Inferior -->
@@ -188,18 +192,14 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     success: function(data) {
-                        $('.content-area').html(data);
+                        $('#ajax-content').html(data);
                         history.pushState(null, '', url);
-    
+
                         if (url.includes('ubicacion')) {
-                            // Usamos setTimeout para asegurarnos de que el DOM se ha actualizado
                             setTimeout(initMap, 0);
-                        } else {
-                            // Si no estamos en la página de ubicación, destruimos el mapa si existe
-                            if (map) {
-                                map.remove();
-                                map = null;
-                            }
+                        } else if (map) {
+                            map.remove();
+                            map = null;
                         }
                     },
                     error: function(xhr) {
@@ -209,35 +209,27 @@
             }
     
             function initMap() {
-                // Asegúrate de que el contenedor del mapa existe
-                if (!$('#map').length) {
-                    console.error('Map container not found');
-                    return;
+                if (!$('#ajax-content #map').length) {
+                    $('#ajax-content').append('<div id="map" style="width: 400px; height: 200px; margin-bottom: 90px;"></div>');
                 }
-    
-                // Si el mapa ya existe, destrúyelo
+
                 if (map) {
                     map.remove();
                     map = null;
                 }
-    
-                // Crea un nuevo div para el mapa
-                $('#map').replaceWith('<div id="map" style="width: 800px; height: 400px; margin-bottom: 90px;"></div>');
-    
-                // Inicializa el mapa
+
                 map = L.map('map').setView([14.703469, -90.576334], 15);
-    
+
                 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 }).addTo(map);
-    
+
                 L.marker([14.703469, -90.576334]).addTo(map)
                     .bindPopup('Heladería Sarita')
                     .openPopup();
             }
     
-            // El resto del código permanece igual...
-    
+          
             $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
@@ -254,7 +246,11 @@
             if (window.location.href.includes('ubicacion')) {
                 initMap();
             }
+        
+            
         });
+
+        
     </script>    
     
     
