@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Sarita</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDjZejdUT9Y3gzgtDaiJitduHFEruxciOo"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         .navbar-custom {
             background-color: #E90B0B;
             padding: 15px 20px; 
-            height: 120px;
+            height: 90px;
         }
         .footer-custom {
             background-color: #E90B0B;
@@ -20,7 +20,7 @@
             bottom: 0;
             width: 100%;
             text-align: left;
-            height: 90px;
+            height: 70px;
             font-size: 1.3rem;
             display: flex;
             justify-content: space-between;
@@ -35,10 +35,13 @@
             text-decoration: underline; /* Añade un subrayado al pasar el mouse por encima */
         }
         .content-area {
-            padding-top: 130px; 
-            padding-bottom: 90px; /* para dejar espacio para la barra inferior */
-            min-height: calc(100vh - 130px); 
+            padding-top: 95px;
+            padding-bottom: 90px;
+            min-height: calc(100vh - 165px); /* Ajusta esta altura según sea necesario */
+            overflow: hidden; /* Evita el desbordamiento si el contenido es más grande */
         }
+
+
         .navbar-nav .nav-link {
             color: white !important;
             font-size: 1.6rem; 
@@ -171,10 +174,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Usar la versión completa de jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <script>
         $(document).ready(function() {
-            // Función para cargar contenido mediante AJAX
+            let map = null;
+    
             function loadContent(url) {
                 $.ajax({
                     url: url,
@@ -185,26 +190,15 @@
                     success: function(data) {
                         $('.content-area').html(data);
                         history.pushState(null, '', url);
-        
-                        // Ejecutar scripts después de cargar el contenido
-                        var scripts = $('.content-area script');
-                        if (scripts.length > 0) {
-                            scripts.each(function() {
-                                eval($(this).text());
-                            });
-                        }
-        
-                        // Inicializar el mapa si estamos en la página de ubicación
+    
                         if (url.includes('ubicacion')) {
-                            if (typeof google !== 'undefined' && typeof window.initMap === 'function') {
-                                window.initMap();
-                            } else {
-                                // Si el API de Google Maps no está cargado, lo cargamos
-                                var script = document.createElement('script');
-                                script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyDjZejdUT9Y3gzgtDaiJitduHFEruxciOo&callback=initMap';
-                                script.async = true;
-                                script.defer = true;
-                                document.head.appendChild(script);
+                            // Usamos setTimeout para asegurarnos de que el DOM se ha actualizado
+                            setTimeout(initMap, 0);
+                        } else {
+                            // Si no estamos en la página de ubicación, destruimos el mapa si existe
+                            if (map) {
+                                map.remove();
+                                map = null;
                             }
                         }
                     },
@@ -213,26 +207,56 @@
                     }
                 });
             }
-        
-            // Manejar clics en los enlaces de navegación
+    
+            function initMap() {
+                // Asegúrate de que el contenedor del mapa existe
+                if (!$('#map').length) {
+                    console.error('Map container not found');
+                    return;
+                }
+    
+                // Si el mapa ya existe, destrúyelo
+                if (map) {
+                    map.remove();
+                    map = null;
+                }
+    
+                // Crea un nuevo div para el mapa
+                $('#map').replaceWith('<div id="map" style="width: 800px; height: 400px; margin-bottom: 90px;"></div>');
+    
+                // Inicializa el mapa
+                map = L.map('map').setView([14.703469, -90.576334], 15);
+    
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+    
+                L.marker([14.703469, -90.576334]).addTo(map)
+                    .bindPopup('Heladería Sarita')
+                    .openPopup();
+            }
+    
+            // El resto del código permanece igual...
+    
             $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
                 e.preventDefault();
                 var url = $(this).attr('href');
                 loadContent(url);
                 
-                // Actualizar la clase 'active'
                 $('.navbar-nav .nav-link').removeClass('active');
                 $(this).addClass('active');
             });
-        
-            // Manejar eventos de navegación del navegador
+    
             $(window).on('popstate', function() {
                 loadContent(location.href);
             });
-        
-            // Cargar el contenido inicial
-            loadContent(window.location.href);
+    
+            if (window.location.href.includes('ubicacion')) {
+                initMap();
+            }
         });
-        </script>
+    </script>    
+    
+    
 </body>
 </html>
