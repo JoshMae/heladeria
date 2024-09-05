@@ -7,95 +7,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 
-    <style>
-        .navbar-custom {
-            background-color: #E90B0B;
-            padding: 15px 20px; 
-            height: 90px;
-        }
-        .footer-custom {
-            background-color: #E90B0B;
-            color: white;
-            padding: 10px 20px;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: left;
-            height: 70px;
-            font-size: 1.3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .footer-custom a {
-            color: white; /* Cambia el color del texto de los enlaces a blanco */
-            text-decoration: none; /* Elimina el subrayado de los enlaces */
-            margin-left: 40px;
-        }
-        .footer-custom a:hover {
-            text-decoration: underline; /* Añade un subrayado al pasar el mouse por encima */
-        }
-        .content-area {
-            padding-top: 95px;
-            padding-bottom: 90px;
-            min-height: calc(100vh - 165px);
-        }
-
-        #ajax-content {
-            overflow: auto;
-        }
-
-        .navbar-nav .nav-link {
-            color: white !important;
-            font-size: 1.6rem; 
-            margin: 0 60px; /* Añade espacio entre los enlaces */
-            padding: 0; 
-        }
-        .navbar-nav .nav-link:hover {
-            color: #ddd !important;
-        }
-        .nav-link.active {
-            border-bottom: 3px solid white; /* Añade una línea blanca debajo del enlace activo */
-            color: white !important; /* Asegura que el texto del enlace activo siga siendo blanco */
-        }
-
-        /* Estilos personalizados para los tooltips */
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip-container .tooltip-text {
-            visibility: hidden;
-            width: 120px;
-            background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
-            color: #333; /* Texto en gris oscuro */
-            text-align: center;
-            border-radius: 5px;
-            padding: 5px 0;
-            position: absolute;
-            z-index: 1;
-            bottom: 80%; /* Posición arriba del icono */
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip-container .tooltip-text::after {
-            content: "";
-            position: absolute;
-            top: 100%; /* Flecha del tooltip */
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: rgba(255, 255, 255, 0.8) transparent transparent transparent; /* Flecha blanca */
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-    </style>
 </head>
 <body>
 
@@ -140,7 +53,7 @@
     </nav>
 
     <!-- Área de Contenido Dinámico -->
-    <div class="container content-area">
+    <div class="content-area">
         <div id="ajax-content">
             @yield('content')
         </div>
@@ -188,83 +101,87 @@
             //let map = null;
     
             function loadContent(url) {
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    success: function(data) {
-                        $('#ajax-content').html(data);
-                        history.pushState(null, '', url);
+    $.ajax({
+        url: url,
+        type: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        success: function(data) {
+            $('#ajax-content').html(data);
+            history.pushState(null, '', url);
 
-                        if (url.includes('ubicacion')) {
-                            setTimeout(initMap, 0);
-                        } else if (map) {
-                            map.remove();
-                            map = null;
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
-                    }
-                });
+            if (url.includes('ubicacion')) {
+                setTimeout(function() {
+                    initMap();
+                    // Mover el contenido adicional fuera del contenedor del mapa
+                    $('#map-info').insertAfter('#map-container');
+                }, 100);
+            } else if (map) {
+                map.remove();
+                map = null;
             }
-    
-            let map = null;
-let routingControl = null;
-
-function initMap() {
-    if (!$('#ajax-content #map').length) {
-        $('#ajax-content').html('<div id="map-container" style="position: relative; height: calc(80vh - 130px - 90px); width: 100%;"><div id="map" style="height: 100%; width: 100%;"></div><button id="route-btn" style="position: absolute; bottom: 10px; left: 10px; z-index: 1000;">Cómo Llegar</button></div>');
-    }
-
-    if (map) {
-        map.remove();
-        map = null;
-    }
-
-    const destination = [14.703469, -90.576334];
-    map = L.map('map').setView(destination, 15);
-
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    L.marker(destination).addTo(map)
-        .bindPopup('Heladería Sarita')
-        .openPopup();
-
-    $('#route-btn').on('click', function() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const userLat = position.coords.latitude;
-                const userLng = position.coords.longitude;
-
-                if (routingControl) {
-                    map.removeControl(routingControl);
-                }
-
-                routingControl = L.Routing.control({
-                    waypoints: [
-                        L.latLng(userLat, userLng),
-                        L.latLng(destination[0], destination[1])
-                    ],
-                    routeWhileDragging: true
-                }).addTo(map);
-
-                map.fitBounds([
-                    [userLat, userLng],
-                    destination
-                ]);
-            }, function() {
-                alert('No se pudo obtener tu ubicación.');
-            });
-        } else {
-            alert('La geolocalización no está soportada por tu navegador.');
+        },
+        error: function(xhr) {
+            console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
         }
     });
 }
+    
+            let map = null;
+            let routingControl = null;
+
+            function initMap() {
+                if (!$('#map-container #map').length) {
+                    $('#map-container').html('<div id="map-container" style="position: relative; height: calc(80vh - 130px - 90px); width: 100%;"><div id="map" style="height: 100%; width: 100%;"></div> <button id="route-btn" class="btn btn-primary btn-lg" style="position: absolute; bottom: 10px; left: 10px; width: 180px; height: 50px; z-index: 1000; line-height: 20px; font-size: 23px;">Cómo Llegar</button></div>');
+                }
+
+                if (map) {
+                    map.remove();
+                    map = null;
+                }
+
+                const destination = [14.703469, -90.576334];
+                map = L.map('map').setView(destination, 15);
+
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+
+                L.marker(destination).addTo(map)
+                    .bindPopup('Heladería Sarita')
+                    .openPopup();
+
+                $('#route-btn').on('click', function() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            const userLat = position.coords.latitude;
+                            const userLng = position.coords.longitude;
+
+                            if (routingControl) {
+                                map.removeControl(routingControl);
+                            }
+
+                            routingControl = L.Routing.control({
+                                waypoints: [
+                                    L.latLng(userLat, userLng),
+                                    L.latLng(destination[0], destination[1])
+                                ],
+                                routeWhileDragging: true
+                            }).addTo(map);
+
+                            map.fitBounds([
+                                [userLat, userLng],
+                                destination
+                            ]);
+                        }, function() {
+                            alert('No se pudo obtener tu ubicación.');
+                        });
+                    } else {
+                        alert('La geolocalización no está soportada por tu navegador.');
+                    }
+                });
+            }
     
           
             $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
