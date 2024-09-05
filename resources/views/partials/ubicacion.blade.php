@@ -1,1 +1,3 @@
-<div id="map" style="height: calc(80vh - 130px - 90px); width: 100%; position: relative;"></div>
+<div id="map-container"></div>
+<h2>Nuestra Ubicación</h2>
+<p>Encuentra la ruta más rápida para llegar a nuestra tienda.</p>

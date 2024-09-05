@@ -6,6 +6,8 @@
     <title>Proyecto Sarita</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
     <style>
         .navbar-custom {
             background-color: #E90B0B;
@@ -175,14 +177,15 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Usar la versión completa de jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    
     <script>
         $(document).ready(function() {
-            let map = null;
+            //let map = null;
     
             function loadContent(url) {
                 $.ajax({
@@ -208,26 +211,60 @@
                 });
             }
     
-            function initMap() {
-                if (!$('#ajax-content #map').length) {
-                    $('#ajax-content').append('<div id="map" style="width: 400px; height: 200px; margin-bottom: 90px;"></div>');
+            let map = null;
+let routingControl = null;
+
+function initMap() {
+    if (!$('#ajax-content #map').length) {
+        $('#ajax-content').html('<div id="map-container" style="position: relative; height: calc(80vh - 130px - 90px); width: 100%;"><div id="map" style="height: 100%; width: 100%;"></div><button id="route-btn" style="position: absolute; bottom: 10px; left: 10px; z-index: 1000;">Cómo Llegar</button></div>');
+    }
+
+    if (map) {
+        map.remove();
+        map = null;
+    }
+
+    const destination = [14.703469, -90.576334];
+    map = L.map('map').setView(destination, 15);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    L.marker(destination).addTo(map)
+        .bindPopup('Heladería Sarita')
+        .openPopup();
+
+    $('#route-btn').on('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                if (routingControl) {
+                    map.removeControl(routingControl);
                 }
 
-                if (map) {
-                    map.remove();
-                    map = null;
-                }
-
-                map = L.map('map').setView([14.703469, -90.576334], 15);
-
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(userLat, userLng),
+                        L.latLng(destination[0], destination[1])
+                    ],
+                    routeWhileDragging: true
                 }).addTo(map);
 
-                L.marker([14.703469, -90.576334]).addTo(map)
-                    .bindPopup('Heladería Sarita')
-                    .openPopup();
-            }
+                map.fitBounds([
+                    [userLat, userLng],
+                    destination
+                ]);
+            }, function() {
+                alert('No se pudo obtener tu ubicación.');
+            });
+        } else {
+            alert('La geolocalización no está soportada por tu navegador.');
+        }
+    });
+}
     
           
             $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
