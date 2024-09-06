@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proyecto Sarita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
@@ -101,108 +102,118 @@
             //let map = null;
     
             function loadContent(url) {
-    $.ajax({
-        url: url,
-        type: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        success: function(data) {
-            $('#ajax-content').html(data);
-            history.pushState(null, '', url);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(data) {
+                        $('#ajax-content').html(data);
+                        history.pushState(null, '', url);
 
-            if (url.includes('ubicacion')) {
-                setTimeout(function() {
-                    initMap();
-                    // Mover el contenido adicional fuera del contenedor del mapa
-                    $('#map-info').insertAfter('#map-container');
-                }, 100);
-            } else if (map) {
-                map.remove();
-                map = null;
-            }
-        },
-        error: function(xhr) {
-            console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
-        }
-    });
-}
-    
-            let map = null;
-            let routingControl = null;
-
-            function initMap() {
-                if (!$('#map-container #map').length) {
-                    $('#map-container').html('<div id="map-container" style="position: relative; height: calc(80vh - 130px - 90px); width: 100%;"><div id="map" style="height: 100%; width: 100%;"></div> <button id="route-btn" class="btn btn-primary btn-lg" style="position: absolute; bottom: 10px; left: 10px; width: 180px; height: 50px; z-index: 1000; line-height: 20px; font-size: 23px;">Cómo Llegar</button></div>');
-                }
-
-                if (map) {
-                    map.remove();
-                    map = null;
-                }
-
-                const destination = [14.703469, -90.576334];
-                map = L.map('map').setView(destination, 15);
-
-                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                }).addTo(map);
-
-                L.marker(destination).addTo(map)
-                    .bindPopup('Heladería Sarita')
-                    .openPopup();
-
-                $('#route-btn').on('click', function() {
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(function(position) {
-                            const userLat = position.coords.latitude;
-                            const userLng = position.coords.longitude;
-
-                            if (routingControl) {
-                                map.removeControl(routingControl);
-                            }
-
-                            routingControl = L.Routing.control({
-                                waypoints: [
-                                    L.latLng(userLat, userLng),
-                                    L.latLng(destination[0], destination[1])
-                                ],
-                                routeWhileDragging: true
-                            }).addTo(map);
-
-                            map.fitBounds([
-                                [userLat, userLng],
-                                destination
-                            ]);
-                        }, function() {
-                            alert('No se pudo obtener tu ubicación.');
-                        });
-                    } else {
-                        alert('La geolocalización no está soportada por tu navegador.');
+                        if (url.includes('ubicacion')) {
+                            setTimeout(function() {
+                                initMap();
+                                // Asegurarse de que los estilos se apliquen correctamente
+                                $('.informacion').css('display', 'flex');
+                                adjustLayout();
+                            }, 100);
+                        } else if (map) {
+                            map.remove();
+                            map = null;
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log('Error: ' + xhr.status + ' ' + xhr.statusText);
                     }
                 });
             }
-    
-          
-            $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
-                e.preventDefault();
-                var url = $(this).attr('href');
-                loadContent(url);
-                
-                $('.navbar-nav .nav-link').removeClass('active');
-                $(this).addClass('active');
-            });
-    
-            $(window).on('popstate', function() {
-                loadContent(location.href);
-            });
-    
-            if (window.location.href.includes('ubicacion')) {
-                initMap();
+
+            // Función para ajustar el diseño después de la carga
+            function adjustLayout() {
+                if ($(window).width() <= 768) {
+                    $('.informacion').css('flex-direction', 'column');
+                    $('.fotoTienda').css('margin-top', '20px');
+                } else {
+                    $('.informacion').css('flex-direction', 'row');
+                    $('.fotoTienda').css('margin-top', '15px');
+                }
             }
-        
+
+            // Llamar a adjustLayout cuando la ventana cambie de tamaño
+            $(window).resize(adjustLayout);
             
-        });
+                    let map = null;
+                    let routingControl = null;
+
+                    function initMap() {
+    if (!$('#map').length) {
+        return;
+    }
+
+    const destination = [14.703469, -90.576334];
+    map = L.map('map').setView(destination, 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker(destination).addTo(map)
+        .bindPopup('Heladería Sarita')
+        .openPopup();
+
+    $('#route-btn').on('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                }
+
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(userLat, userLng),
+                        L.latLng(destination[0], destination[1])
+                    ],
+                    routeWhileDragging: true
+                }).addTo(map);
+
+                map.fitBounds([
+                    [userLat, userLng],
+                    destination
+                ]);
+            }, function() {
+                alert('No se pudo obtener tu ubicación.');
+            });
+        } else {
+            alert('La geolocalización no está soportada por tu navegador.');
+        }
+    });
+}
+            
+                
+                    $('.navbar-nav .nav-link, .tooltip-container .nav-link').on('click', function(e) {
+                        e.preventDefault();
+                        var url = $(this).attr('href');
+                        loadContent(url);
+                        
+                        $('.navbar-nav .nav-link').removeClass('active');
+                        $(this).addClass('active');
+                    });
+            
+                    $(window).on('popstate', function() {
+                        loadContent(location.href);
+                    });
+            
+                    if (window.location.href.includes('ubicacion')) {
+                        initMap();
+                    }
+                
+                    
+                });
 
         
     </script>    
