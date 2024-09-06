@@ -17,7 +17,7 @@ class HomeController extends Controller
     public function nosotros()
     {
         if (request()->ajax()) {
-            return view('nosotros')->render();
+            return view('partials.nosotros')->render();
         }
         return view('nosotros');
     }

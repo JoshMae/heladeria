@@ -1,4 +1,5 @@
 <div id="ubicacion-content" class="container py-5">
+    
     <h1 class="text-center mb-5">Nuestra Ubicación</h1>
     
     <div class="row">
@@ -24,12 +25,14 @@
     </div>
     
     <div class="row mt-5">
+        
         <div class="col-lg-6">
             <h3>Será un Gusto Atenderte</h3>
             <p class="lead">Nuestros horarios de atención se adaptan a ti. Disfruta de nuestros deliciosos helados en un ambiente acogedor y familiar.</p>
         </div>
+      
         <div class="col-lg-6">
-            <img src="{{ asset('images/fotoFranquicia.jpg') }}" alt="Foto de la tienda" class="img-fluid rounded shadow">
+            <img src="{{ asset('images/fotoFranquicia.jpg') }}" alt="Foto de la tienda" class="img-fluid rounded shadow" style="margin-top: -40px;">
         </div>
     </div>
 </div>

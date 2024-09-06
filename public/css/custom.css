@@ -1,35 +1,111 @@
+/* Estilos generales */
+body {
+    font-family: 'Arial', sans-serif;
+}
+
+/* Navbar */
 .navbar-custom {
     background-color: #E90B0B;
-    padding: 15px 20px; 
-    height: 90px;
-}
-.footer-custom {
-    background-color: #E90B0B;
-    color: white;
     padding: 10px 20px;
-    position: fixed;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand img {
+    max-height: 60px;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link {
+    color: white !important;
+    font-size: 1.2rem;
+    margin: 0 20px;
+    padding: 10px 0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
     bottom: 0;
+    left: 50%;
+    background-color: white;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navbar-nav .nav-link:hover::after,
+.nav-link.active::after {
     width: 100%;
-    text-align: left;
-    height: 70px;
-    font-size: 1.3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
-.footer-custom a {
-    color: white; /* Cambia el color del texto de los enlaces a blanco */
-    text-decoration: none; /* Elimina el subrayado de los enlaces */
-    margin-left: 40px;
+
+.navbar-toggler {
+    border-color: rgba(255,255,255,0.5);
 }
-.footer-custom a:hover {
-    text-decoration: underline; /* Añade un subrayado al pasar el mouse por encima */
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3e%3cpath stroke='rgba(255, 255, 255, 0.5)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
+
+/* Tooltip container */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip-container img {
+    transition: transform 0.3s ease;
+}
+
+.tooltip-container:hover img {
+    transform: scale(1.1);
+}
+
+.tooltip-container .tooltip-text {
+    visibility: hidden;
+    width: 120px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.tooltip-container .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.9) transparent transparent transparent;
+}
+
+.tooltip-container:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Content area */
 .content-area {
-    padding-top: 95px; 
+    padding-top: 95px;
     padding-bottom: 90px;
     min-height: calc(100vh - 165px);
-    width: 70%;
+    width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -37,54 +113,151 @@
     overflow: auto;
 }
 
-.navbar-nav .nav-link {
-    color: white !important;
-    font-size: 1.6rem; 
-    margin: 0 60px; /* Añade espacio entre los enlaces */
-    padding: 0; 
-}
-.navbar-nav .nav-link:hover {
-    color: #ddd !important;
-}
-.nav-link.active {
-    border-bottom: 3px solid white; /* Añade una línea blanca debajo del enlace activo */
-    color: white !important; /* Asegura que el texto del enlace activo siga siendo blanco */
+/* Footer */
+.footer-custom {
+    background-color: #E90B0B;
+    color: white;
+    padding: 15px 20px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
 }
 
-/* Estilos personalizados para los tooltips */
-.tooltip-container {
-    position: relative;
-    display: inline-block;
+.footer-custom a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    transition: all 0.3s ease;
 }
-.tooltip-container .tooltip-text {
-    visibility: hidden;
-    width: 120px;
-    background-color: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
-    color: #333; /* Texto en gris oscuro */
+
+.footer-custom a:hover {
+    color: #f8f8f8;
+    text-decoration: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .navbar-custom {
+        padding: 5px 15px;
+    }
+
+    .navbar-brand img {
+        max-height: 50px;
+    }
+
+    .navbar-nav .nav-link {
+        margin: 10px 0;
+        font-size: 1rem;
+    }
+
+    .content-area {
+        width: 90%;
+        padding-top: 70px;
+    }
+
+    .footer-custom {
+        font-size: 0.9rem;
+        flex-direction: column;
+        text-align: center;
+        height: auto;
+    }
+
+    .footer-custom > div {
+        margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-brand img {
+        max-height: 40px;
+    }
+
+    .footer-custom {
+        font-size: 0.8rem;
+    }
+
+    .footer-custom a {
+        margin-left: 10px;
+    }
+}
+
+/*css para nosotros*/
+.principio-container {
+    width: 100%;
     text-align: center;
-    border-radius: 5px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-    bottom: 80%; /* Posición arriba del icono */
-    left: 50%;
-    margin-left: -60px;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-.tooltip-container .tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%; /* Flecha del tooltip */
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: rgba(255, 255, 255, 0.8) transparent transparent transparent; /* Flecha blanca */
-}
-.tooltip-container:hover .tooltip-text {
-    visibility: visible;
-    opacity: 1;
+    background-color: #fff;
 }
 
+.principio-header {
+    background: rgba(200, 0, 0, 0.7);
+    color: white;
+    padding: 30px 20px;
+}
 
+.principio-header h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+.principio-header p {
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.mision-vision-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 40px 20px;
+    background: linear-gradient(90deg, #FFCC00, #FF6600);
+}
+
+.mision, .vision {
+    width: 48%;
+    text-align: left;
+    color: white;
+}
+
+.mision h2, .vision h2 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.mision p, .vision p {
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.valores-container {
+    background-color: red;
+    padding: 30px 20px;
+    color: white;
+}
+
+.valores-container h2 {
+    font-size: 2.5rem;
+}
+
+.valores-list {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.valores-list li {
+    font-size: 1.5rem;
+    margin: 0 20px;
+}
+
+.footer {
+    background-color: #a00;
+    color: white;
+    padding: 10px 0;
+    font-size: 0.9rem;
+}
